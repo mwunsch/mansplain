@@ -44,6 +44,7 @@ var (
 	toolName string
 	section  int
 	output   string
+	dryRun   bool
 )
 
 func init() {
@@ -51,22 +52,12 @@ func init() {
 	generateCmd.Flags().StringVar(&toolName, "name", "", "tool name (inferred if possible)")
 	generateCmd.Flags().IntVar(&section, "section", 1, "man page section number")
 	generateCmd.Flags().StringVarP(&output, "output", "o", "", "output file (default: stdout)")
+	generateCmd.Flags().BoolVar(&dryRun, "dry-run", false, "print the prompt instead of calling the API")
 
 	rootCmd.AddCommand(generateCmd)
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
-	cfg, err := config.Resolve(config.Flags{
-		BaseURL: flagBaseURL,
-		APIKey:  flagAPIKey,
-		Model:   flagModel,
-	})
-	if err != nil {
-		return err
-	}
-
-	ui.ProviderBanner(cfg.BaseURL, cfg.Model)
-
 	var sources []llm.Source
 
 	// Positional arg: file path or - for stdin
@@ -121,20 +112,40 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not infer tool name; use --name to specify it")
 	}
 
-	// Generate
+	// Assemble prompt
 	llm.SetSystemPrompt(generatePrompt)
-
-	client := llm.NewClient(llm.Config{
-		APIURL: cfg.BaseURL,
-		APIKey: cfg.APIKey,
-		Model:  cfg.Model,
-	})
 
 	req := llm.GenerateRequest{
 		Sources: sources,
 		Name:    toolName,
 		Section: section,
 	}
+
+	if dryRun {
+		fmt.Println("=== SYSTEM PROMPT ===")
+		fmt.Println(llm.SystemPrompt())
+		fmt.Println()
+		fmt.Println("=== USER PROMPT ===")
+		fmt.Print(llm.BuildUserPrompt(req))
+		return nil
+	}
+
+	cfg, err := config.Resolve(config.Flags{
+		BaseURL: flagBaseURL,
+		APIKey:  flagAPIKey,
+		Model:   flagModel,
+	})
+	if err != nil {
+		return err
+	}
+
+	ui.ProviderBanner(cfg.BaseURL, cfg.Model)
+
+	client := llm.NewClient(llm.Config{
+		APIURL: cfg.BaseURL,
+		APIKey: cfg.APIKey,
+		Model:  cfg.Model,
+	})
 
 	var result *llm.GenerateResult
 	start := time.Now()

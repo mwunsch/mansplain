@@ -51,35 +51,57 @@ Generate a man page:
 # From a tool name (runs --help automatically)
 mansplain generate --name jq -o jq.1
 
+# From a README
+mansplain generate README.md --name mytool
+
 # From --help output
 mansplain generate --from-help "rg --help" -o rg.1
 
-# From a README
-mansplain generate --from-readme README.md --name mytool
-
 # From stdin
 curl --help | mansplain generate - --name curl
-
-# Multiple sources for richer output
-mansplain generate --from-help "rg --help" --from-readme README.md -o rg.1
 ```
 
-Preview with mandoc:
+Preview and validate:
 
 ```
 mansplain generate --name jq | mandoc -Tutf8 | less
+mansplain generate --name jq | mansplain lint -
 ```
+
+## Agent skill
+
+mansplain ships as an [Agent Skill](https://agentskills.io) that teaches
+any compatible agent (Claude Code, Cursor, Copilot, Gemini CLI, and
+[30+ others](https://agentskills.io)) how to write proper mdoc(7) man pages.
+
+The skill works without the mansplain binary. The agent uses its own model
+and project context to generate the man page, producing better results than
+a standalone LLM call with limited context.
+
+Install the skill:
+
+```
+npx skills add mwunsch/mansplain
+```
+
+Or copy `SKILL.md` from this repo into your project's skills directory.
+
+The skill teaches the agent to:
+1. Read the project's README and CLI help output
+2. Write a complete mdoc(7) man page following conventions
+3. Validate with `mandoc -Tlint` (or `mansplain lint` if installed)
+4. Place the file at `man/man1/<toolname>.1`
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `generate` | Generate a man page from source material via LLM |
+| `lint` | Validate man page structure and completeness |
+| `install` | Install a man page so man(1) can find it |
 | `configure` | Interactively set up the LLM connection |
-| `scaffold` | Generate an mdoc template offline (no LLM) |
-| `install` | Install a man page to the system MANPATH |
-| `preview` | Render a man page in the terminal |
-| `lint` | Validate man page structure |
+
+Use `generate --dry-run` to see the assembled prompt without calling the API.
 
 ## Configuration
 

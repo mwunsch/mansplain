@@ -13,6 +13,8 @@ func SetVersion(v string) {
 	version = v
 }
 
+var flagVersion bool
+
 var rootCmd = &cobra.Command{
 	Use:   "mansplain",
 	Short: "generate man pages from --help output and READMEs",
@@ -27,6 +29,13 @@ idiomatic, well-structured man pages ready for man(1).
   mansplain generate README.md --name mytool`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
+	Run: func(cmd *cobra.Command, args []string) {
+		if flagVersion {
+			fmt.Printf("mansplain %s\n", version)
+			return
+		}
+		cmd.Help()
+	},
 }
 
 var (
@@ -36,17 +45,10 @@ var (
 )
 
 func init() {
+	rootCmd.Flags().BoolVarP(&flagVersion, "version", "v", false, "print version")
 	rootCmd.PersistentFlags().StringVar(&flagBaseURL, "base-url", "", "OpenAI-compatible API base URL")
 	rootCmd.PersistentFlags().StringVar(&flagAPIKey, "api-key", "", "API key")
 	rootCmd.PersistentFlags().StringVar(&flagModel, "model", "", "LLM model to use")
-
-	rootCmd.AddCommand(&cobra.Command{
-		Use:   "version",
-		Short: "Print the version",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("mansplain %s\n", version)
-		},
-	})
 }
 
 func Execute() error {

@@ -14,7 +14,7 @@ Binary is `mansplain`. Config lives at `~/.config/mansplain/config.toml`.
 ## How it works
 
 The `generate` command gathers source material (--help output, README content, stdin),
-constructs a prompt with the system prompt from `prompts/generate.md`, sends it to an
+constructs a prompt with the system prompt from `SKILL.md`, sends it to an
 OpenAI-compatible chat completions API, strips any markdown code fences from the response,
 and writes the mdoc source to stdout (or a file with `-o`).
 
@@ -25,15 +25,13 @@ If `--name` is given but no source material is provided, it runs `<name> --help`
 ## Architecture
 
 ```
-main.go                    Entrypoint, embeds prompts/generate.md via go:embed
+main.go                    Entrypoint, embeds SKILL.md, extracts system prompt from markers
 cmd/
   root.go                  Global flags: --base-url, --api-key, --model
   generate.go              Main command. Sources: positional file, -, --from-help, --name
   configure.go             Interactive config setup via huh form
-  scaffold.go              Offline mdoc template (not yet implemented)
-  install.go               Man page installation (not yet implemented)
-  preview.go               Terminal rendering via mandoc/groff (not yet implemented)
-  lint.go                  mdoc validation via mandoc -Tlint (not yet implemented)
+  install.go               Install man page to ~/.local/share/man/
+  lint.go                  mdoc validation via mandoc -Tlint + section checks
 internal/
   config/config.go         Load/save config, resolve flags > env > file > defaults
   llm/client.go            OpenAI chat completions client, returns content + Usage stats
@@ -42,7 +40,7 @@ internal/
   ui/ui.go                 Styled stderr output via lipgloss (Catppuccin Mocha palette)
   ui/spinner.go            bubbletea spinner with elapsed time (falls back to static on non-TTY)
   ui/configure.go          huh form for mansplain configure
-prompts/generate.md        System prompt: few-shot mdoc example + concise rules
+SKILL.md                   Agent skill AND system prompt (single source of truth)
 testdata/help/grep.txt     Sample --help for tests
 testdata/golden/grep.1     Expected mdoc output for golden file test
 ```
@@ -65,14 +63,15 @@ the source level.
 
 ## The system prompt
 
-`prompts/generate.md` is the most important file in the project. It uses a complete
-grep(1) man page as a few-shot example rather than describing mdoc rules abstractly.
-Small models (3-7B) learn the format much better from a concrete example than from
-a reference card. The prompt ends with a concise rules list for constraints the example
-doesn't fully demonstrate.
+`SKILL.md` is both the agent skill definition AND the system prompt source.
+The CLI embeds SKILL.md and extracts the content between `<!-- system-prompt:start -->`
+and `<!-- system-prompt:end -->` markers for the LLM system prompt. This ensures
+the mdoc guidance is always in sync whether you're using the CLI or the agent skill.
 
-Changes to this file directly affect output quality across all models. Test changes
-against both small local models and larger API models.
+The system prompt section uses a complete grep(1) man page as a few-shot example.
+Small models (3-7B) learn the format much better from a concrete example than from
+a reference card. Changes to SKILL.md directly affect both the agent skill and CLI
+output quality. Test changes against both small local models and larger API models.
 
 ## UI conventions
 
@@ -92,16 +91,3 @@ against both small local models and larger API models.
 - Golden file tests with mock HTTP server for LLM client
 - No global mutable state except the system prompt (set once at startup)
 
-## Stubs
-
-`scaffold`, `install`, `preview`, and `lint` are registered as cobra commands but
-return "not yet implemented" errors. They are described in README.md. When implementing:
-
-- **scaffold**: generate a mdoc template with TODO placeholders, no LLM needed.
-  Use `internal/mdoc/template.go`.
-- **preview**: shell out to `mandoc -Tutf8 <file> | less`, fall back to
-  `groff -mandoc -Tutf8`, last resort raw cat.
-- **lint**: shell out to `mandoc -Tlint` if available, plus check for required
-  sections (NAME, SYNOPSIS, DESCRIPTION) and flag consistency.
-- **install**: detect MANPATH, copy file, run `mandb`/`makewhatis` if available.
-  See `internal/manpath/`.
