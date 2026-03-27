@@ -1,0 +1,103 @@
+.Dd March 26, 2026
+.Dt GREP 1
+.Os
+.Sh NAME
+.Nm grep
+.Nd file pattern searcher
+.Sh SYNOPSIS
+.Nm
+.Op Fl EFGHILRVcilnoqrvw
+.Op Fl A Ar num
+.Op Fl B Ar num
+.Op Fl C Ar num
+.Op Fl D Ar action
+.Op Fl e Ar pattern
+.Op Fl f Ar file
+.Op Ar pattern
+.Op Ar
+.Sh DESCRIPTION
+The
+.Nm
+utility searches any given input files, selecting lines that match one or
+more patterns.
+By default,
+.Nm
+prints the matching lines.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl A Ar num
+Print
+.Ar num
+lines of trailing context after each match.
+.It Fl B Ar num
+Print
+.Ar num
+lines of leading context before each match.
+.It Fl C Ar num
+Print
+.Ar num
+lines of leading and trailing context surrounding each match.
+.It Fl E , Fl -extended-regexp
+Interpret
+.Ar pattern
+as an extended regular expression.
+.It Fl F , Fl -fixed-strings
+Interpret
+.Ar pattern
+as a set of fixed strings.
+.It Fl G , Fl -basic-regexp
+Interpret
+.Ar pattern
+as a basic regular expression.
+This is the default.
+.It Fl H
+Always print filename headers with output lines.
+.It Fl I
+Ignore binary files.
+.It Fl L , Fl -files-without-match
+Print only the names of files not containing selected lines.
+.It Fl R , Fl r , Fl -recursive
+Recursively search subdirectories listed.
+.It Fl V , Fl -version
+Display version information and exit.
+.It Fl c , Fl -count
+Only a count of selected lines is written to standard output.
+.It Fl e Ar pattern
+Specify a pattern used during the search of the input.
+.It Fl i , Fl -ignore-case
+Perform case insensitive matching.
+.It Fl l , Fl -files-with-matches
+Print only the names of files containing selected lines.
+.It Fl n , Fl -line-number
+Precede each output line with its relative line number in the file.
+.It Fl o , Fl -only-matching
+Print only the matching part of the lines.
+.It Fl q , Fl -quiet
+Quiet mode.
+Do not write anything to standard output.
+Exit immediately with zero status if any match is found.
+.It Fl v , Fl -invert-match
+Selected lines are those not matching any of the specified patterns.
+.It Fl w , Fl -word-regexp
+The expression is searched for as a word.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES
+Search for a pattern in a file:
+.Bd -literal -offset indent
+grep 'error' /var/log/syslog
+.Ed
+.Pp
+Recursively search for a pattern, case insensitive:
+.Bd -literal -offset indent
+grep -ri 'todo' src/
+.Ed
+.Pp
+Show 3 lines of context around each match:
+.Bd -literal -offset indent
+grep -C 3 'panic' *.go
+.Ed
+.Sh SEE ALSO
+.Xr awk 1 ,
+.Xr sed 1
