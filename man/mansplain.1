@@ -1,0 +1,189 @@
+.Dd $Mdocdate$
+.Dt MANSPLAIN 1
+.Os
+.Sh NAME
+.Nm mansplain
+.Nd generate man pages from help output and READMEs using an LLM
+.Sh SYNOPSIS
+.Nm
+.Cm generate
+.Op Fl -from-help Ar command
+.Op Fl -name Ar name
+.Op Fl -section Ar num
+.Op Fl -dry-run
+.Op Fl o Ar file
+.Op Ar file | -
+.Nm
+.Cm lint
+.Ar file | -
+.Nm
+.Cm install
+.Op Fl -dry-run
+.Ar file
+.Nm
+.Cm configure
+.Nm
+.Op Fl v
+.Sh DESCRIPTION
+.Nm
+generates
+.Xr mdoc 7
+man pages using an OpenAI-compatible LLM API.
+It takes source material from
+.Fl -help
+output, README files, or standard input and produces idiomatic man page
+source ready for
+.Xr mandoc 1
+or
+.Xr groff 1 .
+.Pp
+.Nm
+also ships as an agent skill compatible with Claude Code, Cursor, Copilot,
+and 40+ other coding agents.
+The skill teaches agents to write man pages directly using their own
+model context.
+.Sh COMMANDS
+.Bl -tag -width configure
+.It Cm generate Op Ar file | -
+Generate a man page from source material via LLM.
+Source material can be a file given as a positional argument,
+.Sq -
+for standard input,
+.Fl -from-help
+to run a command,
+or
+.Fl -name
+to automatically run
+.Ar name Fl -help .
+Multiple sources can be combined.
+.It Cm lint Ar file | -
+Validate an
+.Xr mdoc 7
+file for structural problems.
+Runs
+.Xr mandoc 1
+.Fl Tlint
+if available, checks for required sections
+.Pq NAME, SYNOPSIS, DESCRIPTION ,
+and warns about missing recommended sections.
+.It Cm install Ar file
+Copy a man page to
+.Pa ~/.local/share/man/
+so that
+.Xr man 1
+can find it.
+The section number is inferred from the file extension.
+.It Cm configure
+Interactively set up the LLM connection.
+Prompts for base URL, API key, and model.
+Saves to
+.Pa ~/.config/mansplain/config.toml .
+.El
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl -base-url Ar url
+OpenAI-compatible API base URL.
+.It Fl -api-key Ar key
+API key for authentication.
+.It Fl -model Ar name
+LLM model to use.
+.It Fl v , Fl -version
+Print version and exit.
+.El
+.Pp
+Options for
+.Cm generate :
+.Bl -tag -width Ds
+.It Fl -from-help Ar command
+Run
+.Ar command
+and capture its output as source material.
+.It Fl -name Ar name
+Tool name for the man page.
+If no source material is provided, runs
+.Ar name Fl -help
+automatically.
+Inferred from source content if not given.
+.It Fl -section Ar num
+Man page section number.
+Default is 1.
+.It Fl o , Fl -output Ar file
+Write output to
+.Ar file
+instead of standard output.
+.It Fl -dry-run
+Print the assembled LLM prompt instead of calling the API.
+Does not require an API key.
+.El
+.Sh ENVIRONMENT
+.Bl -tag -width MANSPLAIN_BASE_URL
+.It Ev MANSPLAIN_API_KEY
+API key for authentication.
+Overrides the config file.
+.It Ev MANSPLAIN_BASE_URL
+API base URL.
+Overrides the config file.
+.It Ev MANSPLAIN_MODEL
+Model name.
+Overrides the config file.
+.It Ev OPENAI_API_KEY
+Fallback API key if
+.Ev MANSPLAIN_API_KEY
+is not set.
+.El
+.Sh FILES
+.Bl -tag -width Ds
+.It Pa ~/.config/mansplain/config.toml
+Configuration file.
+Contains
+.Va base_url ,
+.Va api_key ,
+and
+.Va model
+fields in TOML format.
+.It Pa ~/.local/share/man/
+Local man page installation directory used by
+.Cm install .
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Pp
+The
+.Cm lint
+command exits 0 if the file passes all checks, or 1 if errors are found.
+.Sh EXAMPLES
+Generate a man page for ripgrep:
+.Bd -literal -offset indent
+mansplain generate --name rg -o rg.1
+.Ed
+.Pp
+Generate from a README and preview:
+.Bd -literal -offset indent
+mansplain generate README.md --name mytool | mandoc -Tutf8 | less
+.Ed
+.Pp
+Pipe help output from another tool:
+.Bd -literal -offset indent
+curl --help | mansplain generate - --name curl -o curl.1
+.Ed
+.Pp
+Validate a generated man page:
+.Bd -literal -offset indent
+mansplain lint rg.1
+.Ed
+.Pp
+Generate and validate in one pipeline:
+.Bd -literal -offset indent
+mansplain generate --name jq | mansplain lint -
+.Ed
+.Pp
+Install a man page locally:
+.Bd -literal -offset indent
+mansplain install rg.1
+man rg
+.Ed
+.Sh SEE ALSO
+.Xr groff 1 ,
+.Xr man 1 ,
+.Xr mandoc 1 ,
+.Xr mdoc 7

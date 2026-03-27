@@ -56,7 +56,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 	if mandocPath, err := exec.LookPath("mandoc"); err == nil {
 		mandoc := exec.Command(mandocPath, "-Tlint")
 		mandoc.Stdin = strings.NewReader(string(content))
-		out, err := mandoc.CombinedOutput()
+		out, _ := mandoc.CombinedOutput()
 		if len(out) > 0 {
 			// Filter out mandocdb warnings (system-level, not our problem)
 			scanner := bufio.NewScanner(strings.NewReader(string(out)))
@@ -65,20 +65,24 @@ func runLint(cmd *cobra.Command, args []string) error {
 				if strings.Contains(line, "mandoc_mandocdb") || strings.Contains(line, "mandoc.db") {
 					continue
 				}
+				if strings.Contains(line, "referenced manual not found") {
+					continue
+				}
 				if strings.Contains(line, "ERROR") {
 					ui.Error(line)
 					hasErrors = true
 				} else if strings.Contains(line, "WARNING") {
 					ui.Warning(line)
+				} else if strings.Contains(line, "STYLE") {
+					ui.Info("style", line)
 				} else {
 					ui.Info("mandoc", line)
 				}
 			}
 		}
-		if err != nil {
-			// mandoc exits non-zero on errors
-			hasErrors = true
-		}
+		// Don't treat mandoc's exit code as definitive —
+		// it exits non-zero for warnings too. We track errors
+		// from the output parsing above.
 	}
 
 	// Check for required and recommended sections

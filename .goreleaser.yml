@@ -1,0 +1,24 @@
+version: 2
+project_name: mansplain
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - binary: mansplain
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+
+archives:
+  - formats: [tar.gz]
+    wrap_in_directory: true
+    files:
+      - README.md
+      - LICENSE
+      - SKILL.md
+      - man/*

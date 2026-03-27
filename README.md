@@ -14,16 +14,21 @@ LM Studio or Ollama, or any other compatible endpoint.
 
 ## Install
 
+Download a prebuilt binary from
+[GitHub Releases](https://github.com/mwunsch/mansplain/releases).
+Each release includes the binary, man page, and agent skill.
+
+Or with Go:
+
 ```
 go install github.com/mwunsch/mansplain@latest
 ```
 
-Or build from source:
+`go install` only installs the binary. To get the man page too:
 
 ```
 git clone https://github.com/mwunsch/mansplain.git
-cd mansplain
-go build -o mansplain .
+mansplain install mansplain/man/mansplain.1
 ```
 
 ## Quick start
