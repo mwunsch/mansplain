@@ -92,6 +92,9 @@ output quality. Test changes against both small local models and larger API mode
 
 ## Distribution
 
+- `install.sh` is a curl-pipe-sh installer: detects OS/arch, downloads the
+  right tarball from GitHub Releases, installs binary to `~/.local/bin` and
+  man page to `~/.local/share/man/man1`. Both paths overridable via env vars.
 - goreleaser handles cross-compilation (linux/darwin x amd64/arm64) and GitHub
   Releases on tag push. Config in `.goreleaser.yml`. CI in `.github/workflows/release.yml`
   runs tests on push and goreleaser on `v*` tags.
