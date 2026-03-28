@@ -7,24 +7,31 @@ mansplain generate --name rg -o rg.1
 man ./rg.1
 ```
 
-mansplain takes source material you already have and produces well-formed
-[mdoc(7)](https://man.openbsd.org/mdoc.7) man pages. It targets any
-OpenAI-compatible API, so it works with OpenAI, local models via
+Most CLI tools ship without man pages. The format is old, the toolchain
+is hostile, and writing mdoc by hand is nobody's idea of a good time.
+mansplain fixes that. Point it at a `--help` output or a README and it
+produces a well-formed [mdoc(7)](https://man.openbsd.org/mdoc.7) man page.
+
+It also ships as an agent skill, so any AI coding agent can generate
+man pages as part of its normal workflow. The goal is to make man pages
+a standard part of the CLI project scaffold, like README.md already is.
+
+mansplain targets any OpenAI-compatible API: OpenAI, local models via
 LM Studio or Ollama, or any other compatible endpoint.
 
 ## Install
 
 Download a prebuilt binary from
 [GitHub Releases](https://github.com/mwunsch/mansplain/releases).
-Each release includes the binary, man page, and agent skill.
+Each release archive includes the binary, man page, and agent skill.
 
-Or with Go:
+Or with Go (binary only, no man page):
 
 ```
 go install github.com/mwunsch/mansplain@latest
 ```
 
-`go install` only installs the binary. To get the man page too:
+If you installed via `go install` and want the man page:
 
 ```
 git clone https://github.com/mwunsch/mansplain.git
@@ -75,13 +82,16 @@ mansplain generate --name jq | mansplain lint -
 
 ## Agent skill
 
-mansplain ships as an [Agent Skill](https://agentskills.io) that teaches
-any compatible agent (Claude Code, Cursor, Copilot, Gemini CLI, and
-[30+ others](https://agentskills.io)) how to write proper mdoc(7) man pages.
+This is the highest-leverage feature. mansplain ships as an
+[Agent Skill](https://agentskills.io) that teaches any compatible coding
+agent how to write proper mdoc(7) man pages. It works across Claude Code,
+Cursor, Copilot, Gemini CLI, and
+[30+ others](https://agentskills.io).
 
 The skill works without the mansplain binary. The agent uses its own model
-and project context to generate the man page, producing better results than
-a standalone LLM call with limited context.
+and the full project context to generate the man page directly. This
+typically produces better results than a standalone LLM call because the
+agent has access to the source code, not just the help text.
 
 Install the skill:
 
@@ -93,9 +103,13 @@ Or copy `SKILL.md` from this repo into your project's skills directory.
 
 The skill teaches the agent to:
 1. Read the project's README and CLI help output
-2. Write a complete mdoc(7) man page following conventions
+2. Write a complete mdoc(7) man page following mdoc conventions
 3. Validate with `mandoc -Tlint` (or `mansplain lint` if installed)
-4. Place the file at `man/man1/<toolname>.1`
+4. Place the file at `man/<toolname>.1`
+
+The goal: every CLI project built with an AI coding agent should get a
+man page as part of the standard scaffold. If agents know how to write
+README.md, they should know how to write a man page too.
 
 ## Commands
 
@@ -117,6 +131,42 @@ mansplain reads configuration from (highest priority first):
 3. Config file (`~/.config/mansplain/config.toml`)
 4. `OPENAI_API_KEY` environment variable
 5. Default: `https://api.openai.com/v1`
+
+## Working with man pages
+
+Once you have a man page, here's how to use the existing toolchain:
+
+```
+# Preview a local man page file
+mandoc -Tutf8 rg.1 | less
+
+# Install it so man(1) can find it
+mansplain install rg.1
+
+# Now it works like any other man page
+man rg
+
+# Search installed man pages by keyword
+apropos "regular expression"
+
+# One-line description of a tool
+whatis grep
+
+# See where man looks for pages
+manpath
+```
+
+`mansplain install` copies man pages to `~/.local/share/man/`, which is
+in the default search path on both macOS and Linux. No sudo required.
+
+If you need to add a custom directory to the man search path, set `MANPATH`:
+
+```
+export MANPATH="$HOME/myproject/man:$(manpath)"
+```
+
+Note: `man -l file.1` works on Linux for previewing local files but not
+on macOS. Use `mandoc -Tutf8 file.1 | less` instead, which works everywhere.
 
 ## Output format
 

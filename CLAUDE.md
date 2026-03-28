@@ -2,6 +2,14 @@
 
 mansplain generates mdoc(7) man pages from --help output and READMEs using an LLM.
 
+## Project goal
+
+Man pages are underused because the authoring toolchain is hostile. mansplain
+attacks this from two angles: the CLI for humans, and the agent skill for coding
+agents. The skill is the higher-leverage piece -- it meets developers inside their
+editor/agent, where CLI projects are already being built. The goal is to make man
+pages as standard as README.md in the CLI project scaffold.
+
 ## Build and test
 
 ```
@@ -81,6 +89,18 @@ output quality. Test changes against both small local models and larger API mode
 - On non-TTY stderr, the spinner falls back to a single static line.
 - Token usage (prompt/completion/total + elapsed time) prints after generation.
 - Errors use `ui.Error()` which renders a styled `✗` prefix.
+
+## Distribution
+
+- goreleaser handles cross-compilation (linux/darwin x amd64/arm64) and GitHub
+  Releases on tag push. Config in `.goreleaser.yml`. CI in `.github/workflows/release.yml`
+  runs tests on push and goreleaser on `v*` tags.
+- `npx skills add mwunsch/mansplain` installs the agent skill. No binary needed,
+  no registry -- the skill is just `SKILL.md` in this public repo.
+- `go install` works but doesn't include the man page (Go limitation).
+  Users can follow up with `mansplain install man/mansplain.1`.
+- The man page at `man/mansplain.1` is dogfooded -- generated and validated
+  by mansplain itself.
 
 ## Code conventions
 

@@ -39,9 +39,14 @@ or
 .Pp
 .Nm
 also ships as an agent skill compatible with Claude Code, Cursor, Copilot,
-and 40+ other coding agents.
+Gemini CLI, and other coding agents.
 The skill teaches agents to write man pages directly using their own
-model context.
+model and project context, without requiring the
+.Nm
+binary.
+Install the skill with:
+.Pp
+.Dl npx skills add mwunsch/mansplain
 .Sh COMMANDS
 .Bl -tag -width configure
 .It Cm generate Op Ar file | -
@@ -50,7 +55,7 @@ Source material can be a file given as a positional argument,
 .Sq -
 for standard input,
 .Fl -from-help
-to run a command,
+to run a command and capture its output,
 or
 .Fl -name
 to automatically run
@@ -65,7 +70,8 @@ Runs
 .Fl Tlint
 if available, checks for required sections
 .Pq NAME, SYNOPSIS, DESCRIPTION ,
-and warns about missing recommended sections.
+and warns about missing recommended sections
+.Pq OPTIONS, EXAMPLES, EXIT STATUS, SEE ALSO .
 .It Cm install Ar file
 Copy a man page to
 .Pa ~/.local/share/man/
@@ -80,6 +86,7 @@ Saves to
 .Pa ~/.config/mansplain/config.toml .
 .El
 .Sh OPTIONS
+Global options:
 .Bl -tag -width Ds
 .It Fl -base-url Ar url
 OpenAI-compatible API base URL.
@@ -144,6 +151,9 @@ fields in TOML format.
 .It Pa ~/.local/share/man/
 Local man page installation directory used by
 .Cm install .
+In the default
+.Xr manpath 1
+on macOS and Linux.
 .El
 .Sh EXIT STATUS
 .Ex -std
@@ -167,11 +177,6 @@ Pipe help output from another tool:
 curl --help | mansplain generate - --name curl -o curl.1
 .Ed
 .Pp
-Validate a generated man page:
-.Bd -literal -offset indent
-mansplain lint rg.1
-.Ed
-.Pp
 Generate and validate in one pipeline:
 .Bd -literal -offset indent
 mansplain generate --name jq | mansplain lint -
@@ -183,7 +188,10 @@ mansplain install rg.1
 man rg
 .Ed
 .Sh SEE ALSO
+.Xr apropos 1 ,
 .Xr groff 1 ,
 .Xr man 1 ,
 .Xr mandoc 1 ,
+.Xr manpath 1 ,
+.Xr whatis 1 ,
 .Xr mdoc 7
