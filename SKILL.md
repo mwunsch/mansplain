@@ -16,17 +16,37 @@ Generate man pages for CLI tools using the mdoc(7) format.
 
 ## When to use this skill
 
-- User asks to "add a man page", "generate a man page", "write a man page"
-- User asks to document a CLI tool for man(1)
+- User asks to create, update, or add a man page
 - A project has a CLI binary but no man page
+- A project has a config file that should be documented (section 5)
+- A project needs conceptual overview documentation (section 7)
+- User wants to add man pages as part of project documentation
+- As part of scaffolding a new CLI project, alongside README.md
 
 ## How to generate a man page
 
-1. Read the project's README, --help output, and CLI argument definitions
-2. Write an mdoc(7) source file following the format below
-3. Validate with `mandoc -Tlint <file>` if mandoc is available
-4. If `mansplain` CLI is installed, use `mansplain lint <file>` for additional checks
-5. Place the file at `man/<toolname>.1` in the project
+1. Gather context from the project: README, --help output, source code,
+   config file schemas, CLI argument definitions, error messages, tests —
+   anything that helps write an accurate and complete man page. Do not
+   limit yourself to README and --help; use your full knowledge of the project.
+2. Determine the appropriate section: 1 for commands, 5 for config files, 7 for overviews.
+3. Write an mdoc(7) source file following the format below.
+4. Validate with `mandoc -Tlint <file>` if mandoc is available.
+5. If `mansplain` CLI is installed, use `mansplain lint <file>` for additional checks.
+6. Place the file at `man/<name>.<section>` in the project.
+
+## Alternative: maintain man pages in markdown
+
+If the `mansplain` CLI is installed, man page source can be maintained in
+ronn-format(7) markdown and converted deterministically (no LLM required):
+
+1. Write a `man/toolname.1.md` file in ronn-format markdown
+2. Run `mansplain convert man/toolname.1.md -o man/toolname.1`
+3. Validate with `mansplain lint man/toolname.1`
+
+This is useful for ongoing human maintenance — the markdown source is
+readable and editable without mdoc knowledge. For initial generation,
+writing mdoc directly (as this skill teaches) is preferred.
 
 <!-- system-prompt:start -->
 Output a complete mdoc(7) man page. No markdown, no explanation, just the mdoc source.
@@ -175,6 +195,23 @@ Include at least: NAME, SYNOPSIS, DESCRIPTION, OPTIONS (if flags exist), EXAMPLE
 - Use `.Bd -literal -offset indent` / `.Ed` for code blocks in examples.
 - For tools with subcommands, use `.Cm` for subcommand names.
 - `.Dt` title must be UPPERCASE.
+
+## Section-specific guidance
+
+For section 1 (user commands): follow the structure and example above exactly.
+
+For section 5 (file formats and config files):
+- SYNOPSIS shows the file path, not a command: `.Sh SYNOPSIS` / `.Pa /etc/tool.conf`
+- DESCRIPTION documents the file's purpose, syntax, and fields
+- No OPTIONS section. Document fields/directives as a tagged list in DESCRIPTION.
+- Include EXAMPLES showing realistic file contents in `.Bd -literal` blocks.
+
+For section 7 (overviews, conventions, miscellaneous):
+- No SYNOPSIS section.
+- DESCRIPTION is the main content — longer prose explaining concepts.
+- Use `.Ss` subsection headings to organize topics within DESCRIPTION.
+- No OPTIONS section.
+- Include at minimum: NAME, DESCRIPTION, SEE ALSO.
 
 <!-- system-prompt:end -->
 

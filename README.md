@@ -71,6 +71,12 @@ mansplain generate --from-help "rg --help" -o rg.1
 
 # From stdin
 curl --help | mansplain generate - --name curl
+
+# Document a config file (section 5)
+mansplain generate config.toml --name myapp.conf --section 5
+
+# Write an overview from architecture docs (section 7)
+mansplain generate ARCHITECTURE.md --name myframework --section 7
 ```
 
 Preview and validate:
@@ -116,6 +122,7 @@ README.md, they should know how to write a man page too.
 | Command | Description |
 |---------|-------------|
 | `generate` | Generate a man page from source material via LLM |
+| `convert` | Convert ronn-format markdown to mdoc (no LLM required) |
 | `lint` | Validate man page structure and completeness |
 | `install` | Install a man page so man(1) can find it |
 | `configure` | Interactively set up the LLM connection |
@@ -183,6 +190,13 @@ clean, valid mdoc with correct section structure and flag documentation.
 Smaller local models (3-7B parameters) get the general structure right but
 may have syntax errors or hallucinate flags. The system prompt uses a
 few-shot example to maximize compatibility with smaller models.
+
+## Acknowledgments
+
+The `convert` command and ronn-format support are inspired by
+[ronn](https://github.com/rtomayko/ronn) by Ryan Tomayko, which
+showed that a markdown source format makes man page authorship
+accessible to everyone.
 
 ## License
 

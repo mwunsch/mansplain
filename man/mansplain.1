@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm mansplain
-.Nd generate man pages from help output and READMEs using an LLM
+.Nd generate mdoc(7) man pages from source material
 .Sh SYNOPSIS
 .Nm
 .Cm generate
@@ -21,6 +21,10 @@
 .Op Fl -dry-run
 .Ar file
 .Nm
+.Cm convert
+.Op Fl o Ar file
+.Ar file | -
+.Nm
 .Cm configure
 .Nm
 .Op Fl v
@@ -28,14 +32,17 @@
 .Nm
 generates
 .Xr mdoc 7
-man pages using an OpenAI-compatible LLM API.
-It takes source material from
+man pages from source material.
+The
+.Cm generate
+command uses an OpenAI-compatible LLM to produce man pages from
 .Fl -help
-output, README files, or standard input and produces idiomatic man page
-source ready for
-.Xr mandoc 1
-or
-.Xr groff 1 .
+output, README files, config files, or any text passed as input.
+The
+.Cm convert
+command deterministically compiles
+.Xr ronn-format 7
+markdown to mdoc without an LLM.
 .Pp
 .Nm
 also ships as an agent skill compatible with Claude Code, Cursor, Copilot,
@@ -61,6 +68,10 @@ or
 to automatically run
 .Ar name Fl -help .
 Multiple sources can be combined.
+Use
+.Fl -section
+to generate man pages for config file formats (section 5) or
+conceptual overviews (section 7).
 .It Cm lint Ar file | -
 Validate an
 .Xr mdoc 7
@@ -72,6 +83,17 @@ if available, checks for required sections
 .Pq NAME, SYNOPSIS, DESCRIPTION ,
 and warns about missing recommended sections
 .Pq OPTIONS, EXAMPLES, EXIT STATUS, SEE ALSO .
+.It Cm convert Ar file | -
+Convert a
+.Xr ronn-format 7
+markdown file to
+.Xr mdoc 7
+source.
+No LLM required.
+The conversion is deterministic.
+See
+.Xr ronn-format 7
+for the input format.
 .It Cm install Ar file
 Copy a man page to
 .Pa ~/.local/share/man/
@@ -113,7 +135,9 @@ automatically.
 Inferred from source content if not given.
 .It Fl -section Ar num
 Man page section number.
-Default is 1.
+Section 1 for commands (default), 5 for config file formats,
+7 for conceptual overviews.
+Affects the structure the LLM is prompted to produce.
 .It Fl o , Fl -output Ar file
 Write output to
 .Ar file
@@ -137,6 +161,10 @@ Overrides the config file.
 Fallback API key if
 .Ev MANSPLAIN_API_KEY
 is not set.
+.It Ev XDG_CONFIG_HOME
+Override the base configuration directory.
+Defaults to
+.Pa ~/.config .
 .El
 .Sh FILES
 .Bl -tag -width Ds
@@ -177,9 +205,29 @@ Pipe help output from another tool:
 curl --help | mansplain generate - --name curl -o curl.1
 .Ed
 .Pp
+Document a config file (section 5):
+.Bd -literal -offset indent
+mansplain generate config.toml --name myapp.conf --section 5
+.Ed
+.Pp
+Write a conceptual overview from architecture docs (section 7):
+.Bd -literal -offset indent
+mansplain generate ARCHITECTURE.md --name myframework --section 7
+.Ed
+.Pp
+Convert a ronn-format markdown file to mdoc:
+.Bd -literal -offset indent
+mansplain convert man/tool.1.md -o man/tool.1
+.Ed
+.Pp
 Generate and validate in one pipeline:
 .Bd -literal -offset indent
 mansplain generate --name jq | mansplain lint -
+.Ed
+.Pp
+See the prompt that would be sent to the LLM:
+.Bd -literal -offset indent
+mansplain generate --dry-run --name rg
 .Ed
 .Pp
 Install a man page locally:
@@ -194,4 +242,5 @@ man rg
 .Xr mandoc 1 ,
 .Xr manpath 1 ,
 .Xr whatis 1 ,
-.Xr mdoc 7
+.Xr mdoc 7 ,
+.Xr ronn-format 7

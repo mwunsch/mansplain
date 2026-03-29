@@ -34,6 +34,11 @@ Source material can come from files, --help output, or stdin:
   mansplain generate --name jq
   curl --help | mansplain generate - --name curl
 
+Use --section for non-command man pages:
+
+  mansplain generate config.toml --name myapp.conf --section 5
+  mansplain generate ARCHITECTURE.md --name myframework --section 7
+
 Use - to read from stdin. If only --name is given, runs <name> --help.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runGenerate,

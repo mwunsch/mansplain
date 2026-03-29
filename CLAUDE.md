@@ -37,14 +37,17 @@ main.go                    Entrypoint, embeds SKILL.md, extracts system prompt f
 cmd/
   root.go                  Global flags: --base-url, --api-key, --model
   generate.go              Main command. Sources: positional file, -, --from-help, --name
+  convert.go               Ronn-format markdown to mdoc (no LLM, uses goldmark)
   configure.go             Interactive config setup via huh form
   install.go               Install man page to ~/.local/share/man/
-  lint.go                  mdoc validation via mandoc -Tlint + section checks
+  lint.go                  mdoc validation via mandoc -Tlint + section checks (section-aware)
 internal/
   config/config.go         Load/save config, resolve flags > env > file > defaults
   llm/client.go            OpenAI chat completions client, returns content + Usage stats
   llm/prompt.go            System prompt storage, user prompt construction from sources
   llm/client_test.go       Mock HTTP server, golden file validation, code fence stripping
+  convert/convert.go       Goldmark-based ronn-format to mdoc renderer (no LLM dependency)
+  convert/convert_test.go  Tests for markdown-to-mdoc conversion
   ui/ui.go                 Styled stderr output via lipgloss (Catppuccin Mocha palette)
   ui/spinner.go            bubbletea spinner with elapsed time (falls back to static on non-TTY)
   ui/configure.go          huh form for mansplain configure

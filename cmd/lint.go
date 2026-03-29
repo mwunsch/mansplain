@@ -85,17 +85,31 @@ func runLint(cmd *cobra.Command, args []string) error {
 		// from the output parsing above.
 	}
 
+	// Infer section from .Dt line for section-aware checks
+	pageSection := inferPageSection(string(content))
+
 	// Check for required and recommended sections
 	sections := findSections(string(content))
 
-	for _, req := range requiredSections {
+	required := requiredSections
+	recommended := recommendedSections
+	if pageSection == 7 {
+		// Section 7 pages don't need SYNOPSIS
+		required = []string{"NAME", "DESCRIPTION"}
+		recommended = []string{"EXAMPLES", "SEE ALSO"}
+	} else if pageSection == 5 {
+		// Section 5 pages: SYNOPSIS shows a file path, not flags
+		recommended = []string{"EXAMPLES", "SEE ALSO"}
+	}
+
+	for _, req := range required {
 		if !sections[req] {
 			ui.Error(fmt.Sprintf("missing required section: %s", req))
 			hasErrors = true
 		}
 	}
 
-	for _, rec := range recommendedSections {
+	for _, rec := range recommended {
 		if !sections[rec] {
 			ui.Warning(fmt.Sprintf("missing recommended section: %s", rec))
 		}
@@ -127,6 +141,22 @@ func runLint(cmd *cobra.Command, args []string) error {
 
 	ui.Success(fmt.Sprintf("%s: ok", filename))
 	return nil
+}
+
+// inferPageSection extracts the man page section number from the .Dt line.
+func inferPageSection(content string) int {
+	for _, line := range strings.Split(content, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, ".Dt ") {
+			fields := strings.Fields(line)
+			if len(fields) >= 3 {
+				if s := fields[2]; len(s) == 1 && s[0] >= '1' && s[0] <= '9' {
+					return int(s[0] - '0')
+				}
+			}
+		}
+	}
+	return 1 // default to section 1
 }
 
 // findSections scans for .Sh lines and returns a set of section names.

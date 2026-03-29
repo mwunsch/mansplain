@@ -23,7 +23,8 @@ func BuildUserPrompt(req GenerateRequest) string {
 	var b strings.Builder
 
 	upper := strings.ToUpper(req.Name)
-	fmt.Fprintf(&b, "Generate an mdoc(7) man page for %s (section %d).\n", req.Name, req.Section)
+	sectionDesc := sectionDescription(req.Section)
+	fmt.Fprintf(&b, "Generate an mdoc(7) man page for %s (section %d: %s).\n", req.Name, req.Section, sectionDesc)
 	fmt.Fprintf(&b, "Start with exactly:\n.Dd $Mdocdate$\n.Dt %s %d\n.Os\n.Sh NAME\n.Nm %s\n\n", upper, req.Section, req.Name)
 
 	for _, src := range req.Sources {
@@ -38,4 +39,23 @@ func BuildUserPrompt(req GenerateRequest) string {
 	}
 
 	return b.String()
+}
+
+func sectionDescription(section int) string {
+	switch section {
+	case 1:
+		return "user commands"
+	case 2:
+		return "system calls"
+	case 3:
+		return "library functions"
+	case 5:
+		return "file formats and config files"
+	case 7:
+		return "overviews and conventions"
+	case 8:
+		return "system administration"
+	default:
+		return "general"
+	}
 }

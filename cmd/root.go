@@ -17,16 +17,16 @@ var flagVersion bool
 
 var rootCmd = &cobra.Command{
 	Use:   "mansplain",
-	Short: "generate man pages from --help output and READMEs",
-	Long: `mansplain generates mdoc(7) man pages using an LLM.
+	Short: "generate mdoc(7) man pages from source material",
+	Long: `mansplain generates mdoc(7) man pages from source material.
 
-Feed it --help output, a README, or just a tool name and it produces
-idiomatic, well-structured man pages ready for man(1).
+Generate man pages with an LLM, or convert ronn-format markdown
+to mdoc deterministically without one.
 
   mansplain generate --name rg
-  mansplain generate --from-help "jq --help" -o jq.1
-  curl --help | mansplain generate - --name curl
-  mansplain generate README.md --name mytool`,
+  mansplain generate README.md --name mytool
+  mansplain generate config.toml --name myapp.conf --section 5
+  mansplain convert man/tool.1.md -o man/tool.1`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	Run: func(cmd *cobra.Command, args []string) {
