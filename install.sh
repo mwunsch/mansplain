@@ -3,7 +3,6 @@ set -eu
 
 REPO="mwunsch/mansplain"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
-MAN_DIR="${MAN_DIR:-$HOME/.local/share/man/man1}"
 
 # Detect OS
 OS="$(uname -s)"
@@ -49,9 +48,16 @@ echo "Installing binary to $INSTALL_DIR..."
 install -d "$INSTALL_DIR"
 install -m 755 "$TMPDIR/$NAME/mansplain" "$INSTALL_DIR/mansplain"
 
-echo "Installing man page to $MAN_DIR..."
-install -d "$MAN_DIR"
-install -m 644 "$TMPDIR/$NAME/man/mansplain.1" "$MAN_DIR/mansplain.1"
+MAN_BASE="${MAN_BASE:-$HOME/.local/share/man}"
+
+echo "Installing man pages..."
+for page in "$TMPDIR/$NAME"/man/*; do
+  section="${page##*.}"
+  dest="$MAN_BASE/man$section"
+  install -d "$dest"
+  install -m 644 "$page" "$dest/$(basename "$page")"
+  echo "  $(basename "$page") -> $dest/"
+done
 
 echo "Done. Run 'mansplain --version' to verify."
 

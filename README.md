@@ -27,8 +27,8 @@ curl -fsSL https://raw.githubusercontent.com/mwunsch/mansplain/main/install.sh |
 ```
 
 This downloads the latest release, installs the binary to `~/.local/bin`
-and the man page to `~/.local/share/man/man1`. Override with `INSTALL_DIR`
-and `MAN_DIR` environment variables.
+and man pages to `~/.local/share/man/`. Override with `INSTALL_DIR`
+and `MAN_BASE` environment variables.
 
 Or with Go (binary only, no man page):
 
