@@ -1,23 +1,24 @@
 # mansplain
 
-Generate man pages from `--help` output and READMEs using an LLM.
+Generate mdoc(7) man pages from source material.
 
 ```
 mansplain generate --name rg -o rg.1
-man ./rg.1
+mansplain convert man/tool.1.md -o man/tool.1
 ```
 
 Most CLI tools ship without man pages. The format is old, the toolchain
 is hostile, and writing mdoc by hand is nobody's idea of a good time.
-mansplain fixes that. Point it at a `--help` output or a README and it
-produces a well-formed [mdoc(7)](https://man.openbsd.org/mdoc.7) man page.
+mansplain fixes that. Generate man pages with an LLM, or convert
+[ronn-format](https://github.com/rtomayko/ronn) markdown to
+[mdoc(7)](https://man.openbsd.org/mdoc.7) deterministically without one.
 
 It also ships as an agent skill, so any AI coding agent can generate
 man pages as part of its normal workflow. The goal is to make man pages
 a standard part of the CLI project scaffold, like README.md already is.
 
-mansplain targets any OpenAI-compatible API: OpenAI, local models via
-LM Studio or Ollama, or any other compatible endpoint.
+The `generate` command targets any OpenAI-compatible API: OpenAI, local
+models via LM Studio or Ollama, or any other compatible endpoint.
 
 ## Install
 
@@ -108,10 +109,10 @@ npx skills add mwunsch/mansplain
 Or copy `SKILL.md` from this repo into your project's skills directory.
 
 The skill teaches the agent to:
-1. Read the project's README and CLI help output
+1. Gather context from the project: source code, README, help output, config files
 2. Write a complete mdoc(7) man page following mdoc conventions
 3. Validate with `mandoc -Tlint` (or `mansplain lint` if installed)
-4. Place the file at `man/<toolname>.1`
+4. Place the file at `man/<name>.<section>` (section 1 for commands, 5 for config files, 7 for overviews)
 
 The goal: every CLI project built with an AI coding agent should get a
 man page as part of the standard scaffold. If agents know how to write
@@ -191,13 +192,34 @@ Smaller local models (3-7B parameters) get the general structure right but
 may have syntax errors or hallucinate flags. The system prompt uses a
 few-shot example to maximize compatibility with smaller models.
 
-## Acknowledgments
+## Convert
 
-The `convert` command and ronn-format support are inspired by
-[ronn](https://github.com/rtomayko/ronn) by Ryan Tomayko, which
-showed that a markdown source format makes man page authorship
-accessible to everyone.
+The `convert` command compiles [ronn-format](https://github.com/rtomayko/ronn)
+markdown to mdoc. No LLM, no API key, no network. The conversion is
+deterministic.
+
+```
+# Convert a markdown man page to mdoc
+mansplain convert man/tool.1.md -o man/tool.1
+
+# Pipe through lint to validate
+mansplain convert man/tool.1.md | mansplain lint -
+
+# Read from stdin
+cat doc.md | mansplain convert - -o page.1
+```
+
+Ronn-format is markdown with three conventions for man pages: a title
+line (`name(1) -- description`), definition lists for options
+(`* `--flag`:` followed by description), and `<angle brackets>` for
+arguments. See `man ronn-format` for the full format reference
+(included with mansplain).
+
+This is useful for ongoing maintenance. Write the man page source in
+markdown, keep it in version control, and compile to mdoc in your
+build step. Inspired by [ronn](https://github.com/rtomayko/ronn) by
+Ryan Tomayko.
 
 ## License
 
-MIT
+[MIT](LICENSE)

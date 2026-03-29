@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-mansplain generates mdoc(7) man pages from --help output and READMEs using an LLM.
+mansplain generates mdoc(7) man pages from source material. Two paths: `generate`
+uses an LLM, `convert` compiles ronn-format markdown to mdoc deterministically.
 
 ## Project goal
 
@@ -21,14 +22,18 @@ Binary is `mansplain`. Config lives at `~/.config/mansplain/config.toml`.
 
 ## How it works
 
-The `generate` command gathers source material (--help output, README content, stdin),
-constructs a prompt with the system prompt from `SKILL.md`, sends it to an
-OpenAI-compatible chat completions API, strips any markdown code fences from the response,
-and writes the mdoc source to stdout (or a file with `-o`).
+The `generate` command gathers source material (--help output, README content, config
+files, or any text via stdin), constructs a prompt with the system prompt from `SKILL.md`,
+sends it to an OpenAI-compatible chat completions API, strips any markdown code fences
+from the response, and writes the mdoc source to stdout (or a file with `-o`).
+Use `--section` to generate section 5 (config files) or section 7 (overviews) pages.
 
 Tool name inference: if `--name` is not given, the tool tries to extract it from the
 source text by looking for `Usage: toolname` patterns (same-line and next-line variants).
 If `--name` is given but no source material is provided, it runs `<name> --help` automatically.
+
+The `convert` command compiles ronn-format(7) markdown to mdoc using a goldmark-based
+renderer. No LLM, no network. Useful for maintaining man page source in markdown.
 
 ## Architecture
 

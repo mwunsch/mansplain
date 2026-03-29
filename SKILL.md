@@ -1,18 +1,18 @@
 ---
 name: mansplain
 description: |
-  Generate mdoc(7) man pages for CLI tools. Use when the user asks to
-  create, update, or add a man page to a project. Produces idiomatic
-  mdoc source compatible with mandoc and groff.
+  Generate mdoc(7) man pages from source material. Use when the user asks
+  to create, update, or add a man page to a project. Handles commands
+  (section 1), config files (section 5), and overviews (section 7).
+  Produces idiomatic mdoc source compatible with mandoc and groff.
 metadata:
   author: mwunsch
-  version: "0.1.0"
   repository: https://github.com/mwunsch/mansplain
 ---
 
 # mansplain
 
-Generate man pages for CLI tools using the mdoc(7) format.
+Generate mdoc(7) man pages from source material.
 
 ## When to use this skill
 
