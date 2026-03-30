@@ -28,24 +28,6 @@ build_page() {
     -e 's|href="https://man.openbsd.org/groff.1"|href="https://man7.org/linux/man-pages/man1/groff.1.html"|g' \
     -e 's|href="https://man.openbsd.org/manpath.1"|href="https://man7.org/linux/man-pages/man1/manpath.1.html"|g')
 
-  # Build nav
-  case "$out" in
-    index.html)         nav_current="mansplain(7)" ;;
-    mansplain.1.html)   nav_current="mansplain(1)" ;;
-    ronn-format.7.html) nav_current="ronn-format(7)" ;;
-  esac
-
-  nav=""
-  for item in "index.html:mansplain(7)" "mansplain.1.html:mansplain(1)" "ronn-format.7.html:ronn-format(7)"; do
-    href="${item%%:*}"
-    label="${item##*:}"
-    if [ "$label" = "$nav_current" ]; then
-      nav="$nav<a href=\"$href\" class=\"current\">$label</a>"
-    else
-      nav="$nav<a href=\"$href\">$label</a>"
-    fi
-  done
-
   title=$(echo "$fragment" | grep 'head-ltitle' | sed 's/.*>\(.*\)<.*/\1/' | head -1)
   [ -z "$title" ] && title="mansplain"
 
@@ -59,8 +41,22 @@ build_page() {
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav>$nav</nav>
 $fragment
+<script>
+document.querySelectorAll('div.Bd-indent').forEach(function(div) {
+  var pre = div.querySelector('pre');
+  if (!pre) return;
+  var btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'copy';
+  btn.addEventListener('click', function() {
+    navigator.clipboard.writeText(pre.textContent.trim());
+    btn.textContent = 'copied';
+    setTimeout(function() { btn.textContent = 'copy'; }, 1500);
+  });
+  div.appendChild(btn);
+});
+</script>
 </body>
 </html>
 EOF

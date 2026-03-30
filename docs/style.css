@@ -1,46 +1,28 @@
-/* mansplain man page stylesheet — Catppuccin Mocha / Latte */
+/* mansplain man page stylesheet */
 
 :root {
-  /* Catppuccin Mocha */
-  --base: #1e1e2e;
-  --mantle: #181825;
-  --crust: #11111b;
-  --surface0: #313244;
-  --surface1: #45475a;
-  --overlay0: #6c7086;
-  --overlay1: #7f849c;
-  --subtext0: #a6adc8;
-  --text: #cdd6f4;
-  --rosewater: #f5e0dc;
-  --peach: #fab387;
-  --yellow: #f9e2af;
-  --green: #a6e3a1;
-  --teal: #94e2d5;
-  --sapphire: #74c7ec;
-  --blue: #89b4fa;
-  --mauve: #cba6f7;
+  --bg: #fff;
+  --text: #131211;
+  --heading: #030201;
+  --code: #434241;
+  --em: #232221;
+  --link: #0000ff;
+  --muted: #999;
+  --border: #dbdbdb;
+  --pre-bg: #f5f5f5;
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
-    /* Catppuccin Latte */
-    --base: #eff1f5;
-    --mantle: #e6e9ef;
-    --crust: #dce0e8;
-    --surface0: #ccd0da;
-    --surface1: #bcc0cc;
-    --overlay0: #9ca0b0;
-    --overlay1: #8c8fa1;
-    --subtext0: #6c6f85;
-    --text: #4c4f69;
-    --rosewater: #dc8a78;
-    --peach: #fe640b;
-    --yellow: #df8e1d;
-    --green: #40a02b;
-    --teal: #179299;
-    --sapphire: #209fb5;
-    --blue: #1e66f5;
-    --mauve: #8839ef;
+    --bg: #1a1a1a;
+    --text: #d4d4d4;
+    --heading: #e5e5e5;
+    --code: #b0b0b0;
+    --em: #c0c0c0;
+    --link: #6cacff;
+    --muted: #777;
+    --border: #333;
+    --pre-bg: #222;
   }
 }
 
@@ -51,81 +33,78 @@
 }
 
 body {
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Code', Menlo, Consolas, monospace;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.42857;
   color: var(--text);
-  background: var(--base);
-  padding: 2em;
-  max-width: 80ch;
+  background: var(--bg);
+  max-width: 130ex;
+  padding: 0 4ex 1ex 4ex;
   margin: 0 auto;
+  text-align: justify;
 }
 
 /* Navigation */
 nav {
-  padding: 0.5em 0 1.5em;
-  border-bottom: 1px solid var(--surface1);
-  margin-bottom: 1em;
-  font-size: 13px;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
 }
 
 nav a {
-  color: var(--overlay1);
+  color: var(--muted);
   text-decoration: none;
-  margin-right: 1.5em;
+  margin-right: 2em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
 }
 
 nav a:hover {
-  color: var(--sapphire);
+  color: var(--link);
 }
 
 nav a.current {
   color: var(--text);
 }
 
-/* Header and footer tables */
+/* Header and footer */
 table.head, table.foot {
   width: 100%;
-  color: var(--overlay1);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
   font-size: 13px;
 }
 
 table.head {
-  border-bottom: 1px solid var(--surface1);
-  padding-bottom: 0.5em;
-  margin-bottom: 1.5em;
+  margin-bottom: 10px;
 }
 
 table.foot {
-  border-top: 1px solid var(--surface1);
-  padding-top: 0.5em;
-  margin-top: 1.5em;
+  margin-top: 20px;
 }
 
 td.head-vol, td.foot-os {
   text-align: center;
 }
 
-td.head-rtitle {
-  text-align: right;
-}
-
-td.foot-date {
+td.head-rtitle, td.foot-date {
   text-align: right;
 }
 
 /* Sections */
 section.Sh {
-  margin-bottom: 1.5em;
+  margin-bottom: 0;
 }
 
 h1.Sh {
-  color: var(--mauve);
-  font-size: 14px;
+  color: var(--heading);
+  font-size: 20px;
+  line-height: 2;
   font-weight: bold;
-  text-transform: uppercase;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
+  clear: left;
+  margin-top: 10px;
 }
 
 h1.Sh a.permalink {
@@ -133,77 +112,68 @@ h1.Sh a.permalink {
   text-decoration: none;
 }
 
-h1.Sh a.permalink:hover {
-  text-decoration: underline;
-}
-
-/* Subsections */
 h2.Ss {
-  color: var(--mauve);
-  font-size: 14px;
+  color: var(--heading);
+  font-size: 16px;
+  line-height: 1.25;
   font-weight: bold;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-  margin-left: 2ch;
+  clear: left;
+  margin: 0 0 0 4ex;
 }
 
-/* Semantic mdoc elements */
-code.Nm {
-  color: var(--peach);
-  font-weight: bold;
+/* Body text indentation — indent everything except headings and subsections */
+.manual-text section.Sh > *:not(h1):not(h2):not(section) {
+  margin-left: 8ex;
+}
+
+.manual-text section.Ss > *:not(h2) {
+  margin-left: 8ex;
+}
+
+/* Paragraphs */
+p.Pp {
+  margin: 0 0 20px 0;
+}
+
+/* Semantic elements — keep it plain */
+code.Nm, code.Fl, code.Cm, code.Li,
+span.Pa, code.Pa, code.Ev, span.Ev {
   font-family: inherit;
+  font-size: inherit;
 }
 
-span.Nd {
-  color: var(--subtext0);
+code.Nm {
+  font-weight: bold;
+  color: var(--text);
 }
 
 code.Fl {
-  color: var(--blue);
-  font-family: inherit;
-}
-
-var.Ar {
-  color: var(--green);
-  font-style: italic;
-}
-
-code.Cm {
-  color: var(--peach);
-  font-family: inherit;
-}
-
-span.Pa, code.Pa {
-  color: var(--yellow);
-}
-
-code.Ev, span.Ev {
-  color: var(--teal);
-}
-
-code.Li {
+  font-weight: bold;
   color: var(--text);
-  font-family: inherit;
 }
 
-span.Va {
-  color: var(--green);
+var.Ar, span.Va {
   font-style: italic;
+  color: var(--em);
 }
 
-/* Cross-references (links to other man pages) */
-a.Xr {
-  color: var(--sapphire);
-  text-decoration: none;
+span.Nd {
+  color: var(--text);
 }
 
-a.Xr:hover {
-  text-decoration: underline;
+b, strong {
+  font-weight: bold;
+  color: var(--text);
 }
 
-/* General links */
-a {
-  color: var(--sapphire);
+em, i {
+  font-style: italic;
+  color: var(--em);
+}
+
+/* Links */
+a, a:link, a:visited {
+  color: var(--link);
   text-decoration: none;
 }
 
@@ -211,100 +181,90 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Paragraphs */
-p.Pp {
-  margin-top: 0.8em;
+a.Xr {
+  color: var(--link);
 }
 
-/* Body text indentation */
-.manual-text section.Sh > p,
-.manual-text section.Sh > div,
-.manual-text section.Sh > table.Nm,
-.manual-text section.Sh > dl {
-  margin-left: 4ch;
+b.man-ref {
+  font-weight: normal;
+  color: var(--code);
 }
 
-/* Bold */
-b, strong {
-  color: var(--rosewater);
-  font-weight: bold;
-}
-
-/* Emphasis */
-i, em {
-  color: var(--green);
-}
-
-/* Tagged lists (definition lists) */
+/* Tagged lists */
 dl.Bl-tag {
-  margin-left: 4ch;
-  margin-top: 0.5em;
+  margin: 0 0 20px 0;
 }
 
 dl.Bl-tag dt {
-  margin-top: 0.8em;
-  margin-left: -4ch;
+  margin: 0;
+  clear: left;
+}
+
+dl.Bl-tag dt.flush {
+  float: left;
+  width: 8ex;
 }
 
 dl.Bl-tag dd {
-  margin-left: 2ch;
-  margin-top: 0.2em;
+  margin: 0 0 0 9ex;
 }
 
-/* Bullet lists */
-dl.Bl-bullet dt,
-dl.Bl-dash dt {
-  margin-top: 0.5em;
-}
-
-/* Enumerated lists */
-dl.Bl-enum {
-  margin-left: 4ch;
-}
-
-/* Code blocks / literal displays */
-div.Bd-indent {
-  background: var(--mantle);
-  border: 1px solid var(--surface0);
-  border-radius: 4px;
-  padding: 0.8em 1em;
-  margin: 0.5em 0;
-  overflow-x: auto;
-}
-
+/* Code blocks */
 pre {
   font-family: inherit;
   font-size: inherit;
-  color: var(--text);
-  background: var(--mantle);
-  border: 1px solid var(--surface0);
-  border-radius: 4px;
-  padding: 0.8em 1em;
-  margin: 0.5em 0;
+  color: var(--code);
+  padding: 0 4ex;
+  margin: 0 0 20px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
   overflow-x: auto;
 }
 
-/* Display blocks inside indented divs */
-div.Bd-indent pre {
+div.Bd-indent {
+  margin: 0 0 20px 0;
+  padding: 0 4ex;
+  position: relative;
+}
+
+div.Bd-indent .copy-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
   background: none;
   border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 2px 6px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+div.Bd-indent:hover .copy-btn {
+  opacity: 1;
+}
+
+div.Bd-indent .copy-btn:hover {
+  color: var(--text);
+}
+
+div.Bd-indent pre {
   padding: 0;
   margin: 0;
 }
 
-/* Synopsis table */
+/* Synopsis */
 table.Nm {
-  margin-top: 0.3em;
+  margin: 0 0 0 0;
 }
 
-/* Inline display */
-.Dl {
-  margin-left: 4ch;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-
-/* Synopsis brackets */
 table.Nm td {
   vertical-align: top;
+}
+
+/* Display block */
+.Dl {
+  margin-left: 8ex;
 }
