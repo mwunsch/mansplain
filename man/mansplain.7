@@ -1,0 +1,184 @@
+.Dd $Mdocdate$
+.Dt MANSPLAIN 7
+.Os mansplain
+.Sh NAME
+.Nm mansplain
+.Nd generate mdoc(7) man pages from source material
+.Sh DESCRIPTION
+.Nm
+generates
+.Xr mdoc 7
+man pages from source material.
+It provides two paths to man page authorship:
+.Bl -tag -width convert
+.It Cm generate
+Uses an LLM to produce man pages from
+.Fl -help
+output, README files, config files, or any text.
+Targets any OpenAI-compatible API.
+.It Cm convert
+Compiles
+.Xr ronn-format 7
+markdown to mdoc deterministically.
+No LLM, no network, no API key.
+.El
+.Pp
+.Nm
+also ships as an agent skill that teaches coding agents
+(Claude Code, Cursor, Copilot, Gemini CLI, and others) how to
+write man pages using their own model and project context.
+.Pp
+For the command reference, see
+.Xr mansplain 1 .
+.Sh INSTALL
+.Ss curl | sh
+.Bd -literal -offset indent
+curl -fsSL https://raw.githubusercontent.com/mwunsch/mansplain/main/install.sh | sh
+.Ed
+.Pp
+Installs the binary to
+.Pa ~/.local/bin
+and man pages to
+.Pa ~/.local/share/man .
+Override with
+.Ev INSTALL_DIR
+and
+.Ev MAN_BASE
+environment variables.
+.Ss Go
+.Bd -literal -offset indent
+go install github.com/mwunsch/mansplain@latest
+.Ed
+.Pp
+Binary only.
+Run
+.Ql mansplain install man/mansplain.1
+afterward to get the man page.
+.Ss GitHub Releases
+Download prebuilt binaries from
+.Lk https://github.com/mwunsch/mansplain/releases "GitHub Releases" .
+Each archive includes the binary, man pages, and agent skill.
+.Sh GETTING STARTED
+Configure the LLM connection:
+.Bd -literal -offset indent
+mansplain configure
+.Ed
+.Pp
+This prompts for a base URL, API key, and model, then saves to
+.Pa ~/.config/mansplain/config.toml .
+Defaults to the OpenAI API.
+For local models, point it at LM Studio or Ollama:
+.Bd -literal -offset indent
+base_url = "http://localhost:1234/v1"
+api_key = "lm-studio"
+.Ed
+.Pp
+Generate a man page:
+.Bd -literal -offset indent
+mansplain generate --name jq -o jq.1
+mansplain generate README.md --name mytool
+curl --help | mansplain generate - --name curl
+.Ed
+.Pp
+Generate man pages for config files (section 5) or overviews (section 7):
+.Bd -literal -offset indent
+mansplain generate config.toml --name myapp.conf --section 5
+mansplain generate ARCHITECTURE.md --name myframework --section 7
+.Ed
+.Pp
+Preview and validate:
+.Bd -literal -offset indent
+mansplain generate --name jq | mandoc -Tutf8 | less
+mansplain generate --name jq | mansplain lint -
+.Ed
+.Sh CONVERT
+The
+.Cm convert
+command compiles
+.Xr ronn-format 7
+markdown to mdoc.
+No LLM required.
+.Bd -literal -offset indent
+mansplain convert man/tool.1.md -o man/tool.1
+mansplain convert man/tool.1.md | mansplain lint -
+.Ed
+.Pp
+Ronn-format is markdown with conventions for man pages:
+a title line
+.Pq Ql name(1) -- description ,
+definition lists for options, and angle brackets for arguments.
+.Pp
+This is useful for ongoing maintenance.
+Write the source in markdown, keep it in version control,
+and compile to mdoc in your build step.
+.Sh AGENT SKILL
+Install the skill into any project:
+.Bd -literal -offset indent
+npx skills add mwunsch/mansplain
+.Ed
+.Pp
+The skill works without the
+.Nm
+binary.
+The agent uses its own model and full project context to write the
+man page directly, producing better results than a standalone LLM
+call with limited context.
+.Pp
+The skill teaches the agent to:
+.Bl -enum -offset indent
+.It
+Gather context from the project: source code, README, help output,
+config files, error messages.
+.It
+Determine the appropriate section: 1 for commands, 5 for config
+files, 7 for overviews.
+.It
+Write a complete
+.Xr mdoc 7
+man page following conventions.
+.It
+Validate with
+.Xr mandoc 1
+or
+.Nm
+.Cm lint .
+.It
+Place the file at
+.Pa man/<name>.<section> .
+.El
+.Sh WORKING WITH MAN PAGES
+Once you have a man page, the standard toolchain takes over:
+.Bl -tag -width "mansplain install"
+.It Nm mansplain Cm install Ar file
+Copy a man page to
+.Pa ~/.local/share/man
+so
+.Xr man 1
+can find it.
+No sudo required.
+.It Xr mandoc 1 Fl Tutf8 Ar file | Xr less 1
+Preview a man page in the terminal.
+.It Xr apropos 1 Ar keyword
+Search installed man pages by keyword.
+This is what makes installed man pages discoverable.
+.It Xr whatis 1 Ar command
+Show the one-line description of a command.
+.It Xr manpath 1
+Show where
+.Xr man 1
+looks for pages.
+.El
+.Pp
+.Sy Note :
+.Ql man -l file.1
+works on Linux but not macOS.
+Use
+.Ql mandoc -Tutf8 file.1 | less
+instead.
+.Sh SEE ALSO
+.Xr mansplain 1 ,
+.Xr mandoc 1 ,
+.Xr mdoc 7 ,
+.Xr ronn-format 7
+.Pp
+.Lk https://github.com/mwunsch/mansplain
