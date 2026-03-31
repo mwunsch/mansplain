@@ -44,6 +44,14 @@ body {
   text-align: justify;
 }
 
+@media (max-width: 600px) {
+  body {
+    font-size: 13px;
+    padding: 0 1.5ex 1ex 1.5ex;
+    text-align: left;
+  }
+}
+
 /* Navigation */
 nav {
   padding: 10px 0;
@@ -267,4 +275,70 @@ table.Nm td {
 /* Display block */
 .Dl {
   margin-left: 8ex;
+}
+
+/* Mobile overrides */
+@media (max-width: 600px) {
+  /* Header/footer tables: keep three-column layout but tighten */
+  table.head, table.foot {
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  /* Section headings */
+  h1.Sh {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-top: 8px;
+  }
+
+  h2.Ss {
+    font-size: 14px;
+    margin-left: 2ex;
+  }
+
+  /* Reduce body text indentation */
+  .manual-text section.Sh > *:not(h1):not(h2):not(section) {
+    margin-left: 3ex;
+  }
+
+  .manual-text section.Ss > *:not(h2) {
+    margin-left: 3ex;
+  }
+
+  /* Tagged lists */
+  dl.Bl-tag dt.flush {
+    float: none;
+    width: auto;
+  }
+
+  dl.Bl-tag dd {
+    margin-left: 3ex;
+  }
+
+  /* Code blocks */
+  pre {
+    padding: 0 1ex;
+    overflow-x: auto;
+  }
+
+  div.Bd-indent {
+    padding: 0 1ex;
+  }
+
+  /* Display block */
+  .Dl {
+    margin-left: 3ex;
+  }
+
+  /* Navigation */
+  nav a {
+    margin-right: 1em;
+    font-size: 11px;
+  }
+
+  /* Copy button always visible on touch */
+  div.Bd-indent .copy-btn {
+    opacity: 1;
+  }
 }
